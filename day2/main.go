@@ -95,7 +95,46 @@ func part1(input string) int {
 }
 
 func part2(input string) int {
-	return 0
+	ans := 0
+
+	for _, line := range strings.Split(strings.TrimSuffix(input, "\n"), "\n") {
+		i := strings.IndexByte(line, ':')
+		biggestRedCount := 0
+		biggestGreenCount := 0
+		biggestBlueCount := 0
+		game := strings.Split(line[i+2:], "; ")
+		
+		for _, round := range game {
+			singleRound := strings.Split(round, ", ")
+			for _, pull := range singleRound {
+				singlePull := strings.Split(pull, " ")
+				count := singlePull[0]
+				color := singlePull[1]
+
+				switch color {
+				case "red":
+					redCount := stringToInt(count)
+					if redCount > biggestRedCount {
+						biggestRedCount = redCount
+					}
+				case "green":
+					greenCount := stringToInt(count)
+					if greenCount > biggestGreenCount {
+						biggestGreenCount = greenCount
+					}
+				case "blue":
+					blueCount := stringToInt(count)
+					if blueCount > biggestBlueCount {
+						biggestBlueCount = blueCount
+					}
+				}
+
+			}
+		}
+		ans += biggestRedCount * biggestGreenCount * biggestBlueCount 
+	}
+
+	return ans
 }
 
 func parseInput(input string) (parsedInput []int) {
