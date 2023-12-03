@@ -117,7 +117,72 @@ func part1(input string) int {
 }
 
 func part2(input string) int {
-	return 0
+	var ans int
+
+	numRegex := regexp.MustCompile("[0-9]+")
+	gearRegex := regexp.MustCompile("[*]")
+
+	splitInput := strings.Split(strings.TrimSuffix(input, "\n"), "\n")
+	for i := 0; i < len(splitInput); i++ {
+		gearsIndexes := gearRegex.FindAllStringIndex(splitInput[i], -1)
+		for _, gearIndex := range gearsIndexes {
+			var gearParts []int
+
+			parsedNums := numRegex.FindAllString(splitInput[i], -1)
+			numsIndexes := numRegex.FindAllStringIndex(splitInput[i], -1)
+
+			for pos, numIndex := range numsIndexes {
+				if numIndex[1] == gearIndex[0] || numIndex[0] == gearIndex[1] {
+					gearParts = append(gearParts, stringToInt(parsedNums[pos]))
+				}
+			}
+
+			if i == 0 {
+				numsInNextRow := numRegex.FindAllString(splitInput[i+1], -1)
+				indexesOfNumsInNextRow := numRegex.FindAllStringIndex(splitInput[i+1], -1)
+
+				for pos, numIndex := range indexesOfNumsInNextRow {
+					if intersect(numIndex, gearIndex) || isAboveOrBelow(numIndex, gearIndex) {
+						gearParts = append(gearParts, stringToInt(numsInNextRow[pos]))
+					}
+				}
+			} else if i == len(splitInput)-1 {
+				numsInPreviousRow := numRegex.FindAllString(splitInput[i-1], -1)
+				indexesOfNumsInPreviousRow := numRegex.FindAllStringIndex(splitInput[i-1], -1)
+
+				for pos, numIndex := range indexesOfNumsInPreviousRow {
+					if intersect(numIndex, gearIndex) || isAboveOrBelow(numIndex, gearIndex) {
+						gearParts = append(gearParts, stringToInt(numsInPreviousRow[pos]))
+					}
+				}
+			} else {
+				numsInNextRow := numRegex.FindAllString(splitInput[i+1], -1)
+				indexesOfNumsInNextRow := numRegex.FindAllStringIndex(splitInput[i+1], -1)
+				numsInPreviousRow := numRegex.FindAllString(splitInput[i-1], -1)
+				indexesOfNumsInPreviousRow := numRegex.FindAllStringIndex(splitInput[i-1], -1)
+
+				for pos, numIndex := range indexesOfNumsInNextRow {
+					if intersect(numIndex, gearIndex) || isAboveOrBelow(numIndex, gearIndex) {
+						gearParts = append(gearParts, stringToInt(numsInNextRow[pos]))
+					}
+				}
+
+				for pos, numIndex := range indexesOfNumsInPreviousRow {
+					if intersect(numIndex, gearIndex) || isAboveOrBelow(numIndex, gearIndex) {
+						gearParts = append(gearParts, stringToInt(numsInPreviousRow[pos]))
+					}
+				}
+
+			}
+
+			if len(gearParts) == 2 {
+				ans += gearParts[0] * gearParts[1]
+			}
+		}
+
+	}
+
+	return ans
 }
 
 func parseInput(input string) (parsedInput []int) {
@@ -131,3 +196,28 @@ func stringToInt(input string) int {
 	output, _ := strconv.Atoi(input)
 	return output
 }
+
+func intersect(arr1, arr2 []int) bool {
+	var intersect bool
+	bucket := map[int]bool{}
+	for _, i := range arr1 {
+	   for _, j := range arr2 {
+		  if i == j && !bucket[i] {
+			intersect = true
+			 bucket[i] = true
+		  }
+	   }
+	}
+	return intersect
+ }
+
+ func isAboveOrBelow(arr1, arr2 []int) bool {
+	var isAboveOrBelow bool
+	for i := arr1[0]; i <= arr1[1]; i++ {
+		if i == arr2[0] || i == arr2[1] {
+			isAboveOrBelow = true
+		}
+	}
+
+	return isAboveOrBelow
+ }
